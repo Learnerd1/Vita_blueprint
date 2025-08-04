@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vita: An Interactive Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral -->
+    <!-- Application Structure Plan: The SPA is designed with a three-act structure: Philosophy (The 'Why'), Architecture (The 'How'), and Blueprint (The 'What'). This narrative flow guides the user from high-level concepts to practical implementation. A sticky top navigation allows easy movement between these core sections. The centerpiece is the interactive 'Architecture' diagram, which visually represents the interconnected database system—a far more intuitive approach than text-based lists. Clicking on a database node reveals its detailed properties and purpose, encouraging exploration and deeper understanding. This structure was chosen to make a dense, text-heavy report digestible and engaging, transforming passive reading into active discovery. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core principles (Systems Thinking, GTD, PARA, etc.). Goal: Compare & Inform. Viz: Radar Chart (Chart.js). Interaction: Hover tooltips. Justification: Visually synthesizes how various methodologies contribute to the holistic 'Vita' system, showing their balanced integration.
+        - Report Info: The 8 master databases and their relationships. Goal: Organize & Relationships. Viz: Interactive HTML/CSS Diagram. Interaction: Click to reveal details. Justification: This is the most critical concept. A visual, interactive map is vastly superior to a list for understanding system interconnectedness. It becomes the primary exploration tool.
+        - Report Info: Database property tables. Goal: Inform. Viz: Styled HTML Tables. Interaction: Hover effects. Justification: Presents detailed specifications in a clear, structured format that is easy to reference when building the system.
+        - Report Info: Step-by-step implementation guide. Goal: Organize. Viz: Numbered list with distinct visual sections. Interaction: N/A. Justification: A clear, linear checklist format is most effective for guiding a user through a sequential process.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #A855F7; /* purple-500 */
+            border-bottom-color: #A855F7; /* purple-500 */
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .db-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #D6D3D1; /* stone-300 */
+        }
+        .db-node:hover, .db-node.active {
+            border-color: #A855F7; /* purple-500 */
+            background-color: #F3E8FF; /* purple-100 */
+            transform: scale(1.05);
+        }
+        .db-connector {
+            position: absolute;
+            background-color: #D6D3D1; /* stone-300 */
+            z-index: -1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-purple-600">Vita</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#philosophy" class="nav-link text-gray-600 font-medium pb-1">Philosophy</a>
+                <a href="#architecture" class="nav-link text-gray-600 font-medium pb-1">Architecture</a>
+                <a href="#blueprint" class="nav-link text-gray-600 font-medium pb-1">Blueprint</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-100 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5">
+                    <option value="#philosophy">Philosophy</option>
+                    <option value="#architecture">Architecture</option>
+                    <option value="#blueprint">Blueprint</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center mb-24">
+            <h2 class="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">Build Your Personal OS</h2>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                An interactive blueprint for creating <span class="text-purple-600 font-semibold">Vita</span>: a living, breathing operating system for your life, built in Notion. Move beyond simple to-do lists and design a system that sharpens your thinking, fuels your creativity, and aligns your actions with your deepest values.
+            </p>
+        </section>
+
+        <!-- Section 1: Philosophy -->
+        <section id="philosophy" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <span class="text-purple-600 font-semibold">The 'Why'</span>
+                <h3 class="text-4xl font-bold mt-2">The Foundational Philosophy</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">A robust system is built on a strong foundation. This section explores the core principles and proven methodologies that underpin Vita, ensuring it's not just a collection of tools, but a cohesive system for personal growth.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card: Core Values -->
+                <div class="card p-6">
+                    <h4 class="text-xl font-bold mb-2">1. Define Your Vision</h4>
+                    <p class="text-gray-600">Start with introspection. Before building, you must clarify your core values and life vision. This 'why' becomes the compass for your system, ensuring every task, project, and goal is aligned with what truly matters to you.</p>
+                </div>
+                <!-- Card: Systems Thinking -->
+                <div class="card p-6">
+                    <h4 class="text-xl font-bold mb-2">2. Adopt a Systems Mindset</h4>
+                    <p class="text-gray-600">View your life as an interconnected system. Understand how different areas influence each other. Vita is designed with feedback loops and emergence in mind, where small, consistent actions compound into significant transformation.</p>
+                </div>
+                <!-- Card: Methodologies -->
+                <div class="card p-6 md:col-span-2 lg:col-span-1">
+                    <h4 class="text-xl font-bold mb-2">3. Integrate Proven Methods</h4>
+                    <p class="text-gray-600">Vita synthesizes the best ideas from leading productivity frameworks. It's a hybrid system designed for flexibility, allowing you to leverage powerful concepts without being locked into a rigid structure.</p>
+                </div>
+            </div>
+
+            <!-- Methodologies Chart -->
+            <div class="mt-16">
+                 <div class="card p-6 md:p-8">
+                    <h4 class="text-2xl font-bold text-center mb-2">Synthesizing Core Methodologies</h4>
+                    <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Vita integrates key principles from multiple frameworks to create a holistic system. This chart visualizes the system's focus across different productivity dimensions.</p>
+                    <div class="chart-container">
+                        <canvas id="methodologiesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Architecture -->
+        <section id="architecture" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <span class="text-purple-600 font-semibold">The 'How'</span>
+                <h3 class="text-4xl font-bold mt-2">The Core Architecture</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">At the heart of Vita is a set of interconnected master databases. This is not just a filing system; it's a dynamic network that brings your data to life. Click on a database below to explore its structure and purpose.</p>
+            </div>
+
+            <div class="lg:flex gap-8">
+                <!-- Interactive Diagram -->
+                <div class="lg:w-1/2 w-full mb-8 lg:mb-0">
+                    <div id="db-diagram" class="relative grid grid-cols-3 gap-x-4 gap-y-12 items-center justify-center p-4 bg-white rounded-xl shadow-lg h-full">
+                        <!-- Row 1 -->
+                        <div></div>
+                        <div id="node-goals" class="db-node p-4 text-center rounded-lg">
+                            <span class="text-4xl">🎯</span>
+                            <p class="font-semibold mt-2">Goals & OKRs</p>
+                        </div>
+                        <div></div>
+                        <!-- Row 2 -->
+                        <div id="node-areas" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">🧭</span>
+                            <p class="font-semibold mt-2">Areas of Focus</p>
+                        </div>
+                        <div id="node-projects" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">🚀</span>
+                            <p class="font-semibold mt-2">Projects</p>
+                        </div>
+                        <div id="node-tasks" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">✅</span>
+                            <p class="font-semibold mt-2">Tasks</p>
+                        </div>
+                        <!-- Row 3 -->
+                        <div id="node-knowledge" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">🧠</span>
+                            <p class="font-semibold mt-2">Knowledge Vault</p>
+                        </div>
+                        <div id="node-journal" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">✍️</span>
+                            <p class="font-semibold mt-2">Journal</p>
+                        </div>
+                         <div id="node-habits" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">🔁</span>
+                            <p class="font-semibold mt-2">Habits</p>
+                        </div>
+                         <!-- Row 4 -->
+                        <div></div>
+                        <div id="node-people" class="db-node p-4 text-center rounded-lg">
+                             <span class="text-4xl">👥</span>
+                            <p class="font-semibold mt-2">People</p>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+
+                <!-- Details Display -->
+                <div id="db-details-container" class="lg:w-1/2 w-full card p-6 md:p-8 min-h-[400px]">
+                    <!-- Content will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Blueprint -->
+        <section id="blueprint" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <span class="text-purple-600 font-semibold">The 'What'</span>
+                <h3 class="text-4xl font-bold mt-2">The Implementation Blueprint</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">This practical guide provides the step-by-step process for building your own Vita system in Notion. Follow these steps to turn the architectural concepts into a functional, personalized workspace.</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-12">
+                <!-- Step 1 -->
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl font-bold">1</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-2">Set Up Your Dashboard & Databases</h4>
+                        <p class="text-gray-600">Start by creating your main "Vita" dashboard page. Then, create each of the 8 master databases as separate full-page databases. Don't worry about content yet—focus on establishing the core structure and defining the properties for each database as detailed in the architecture section.</p>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl font-bold">2</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-2">Establish Key Relations</h4>
+                        <p class="text-gray-600">This is where the magic happens. Go into each database and add 'Relation' properties to link them together. Connect Tasks to Projects, Projects to Goals, Knowledge to Areas, etc. This creates the interconnected web that allows information to flow seamlessly through your system.</p>
+                    </div>
+                </div>
+                 <!-- Step 3 -->
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl font-bold">3</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-2">Create Page Templates & Automations</h4>
+                        <p class="text-gray-600">To make your system frictionless, create custom page templates within your databases for recurring entries (e.g., a 'New Project' template). Set up Notion Buttons for quick actions like logging a habit and use recurring task features to automate your routines.</p>
+                    </div>
+                </div>
+                 <!-- Step 4 -->
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl font-bold">4</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-2">Populate, Customize & Refine</h4>
+                        <p class="text-gray-600">Begin populating your system with your actual projects, tasks, and notes. Customize the aesthetics with icons and covers. Most importantly, treat Vita as a living system. Use weekly reviews to maintain it, reflect on what's working, and refine its structure as your life evolves.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-100 mt-24">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p>Vita Interactive Blueprint</p>
+            <p class="text-sm mt-1">Inspired by the principles of systems thinking and continuous improvement.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- DATA ---
+            const dbData = {
+                'node-goals': {
+                    title: '🎯 Goals & OKRs',
+                    description: 'This is the strategic layer, defining your high-level ambitions. It links your long-term vision to actionable projects, ensuring every effort is purpose-driven.',
+                    properties: [
+                        { name: 'Objective', type: 'Title', purpose: 'High-level goal statement.' },
+                        { name: 'Key Results', type: 'Text/Page', purpose: 'Measurable outcomes.' },
+                        { name: 'Category', type: 'Multi-select', purpose: 'Life domain (e.g., Career, Health).' },
+                        { name: 'Time Horizon', type: 'Select', purpose: 'Yearly, Quarterly, etc.' },
+                        { name: 'Progress', type: 'Rollup', purpose: 'Calculates completion of linked projects.' },
+                        { name: 'Linked Projects', type: 'Relation', purpose: 'Connects to the Projects database.' },
+                    ]
+                },
+                'node-areas': {
+                    title: '🧭 Areas of Focus',
+                    description: 'These are the ongoing domains of your life that require continuous maintenance, like "Health" or "Finances." They act as high-level containers for related projects and knowledge.',
+                    properties: [
+                        { name: 'Name', type: 'Title', purpose: 'e.g., Health & Fitness, Career.' },
+                        { name: 'Status', type: 'Select', purpose: 'Active, Inactive.' },
+                        { name: 'Related Projects', type: 'Relation', purpose: 'Links to the Projects database.' },
+                        { name: 'Related Knowledge', type: 'Relation', purpose: 'Links to the Knowledge Vault.' },
+                    ]
+                },
+                'node-projects': {
+                    title: '🚀 Projects',
+                    description: 'Projects are endeavors with a clear goal and a defined end date. They are composed of multiple tasks and are always linked to a broader Area of Focus.',
+                    properties: [
+                        { name: 'Name', type: 'Title', purpose: 'The project\'s name.' },
+                        { name: 'Status', type: 'Select/Status', purpose: 'Active, On Hold, Completed.' },
+                        { name: 'Area', type: 'Relation', purpose: 'Links to Areas of Focus.' },
+                        { name: 'Goal', type: 'Relation', purpose: 'Links to Goals & OKRs.' },
+                        { name: 'Due Date', type: 'Date', purpose: 'Project deadline.' },
+                        { name: 'Progress', type: 'Rollup', purpose: 'Shows % of linked tasks completed.' },
+                    ]
+                },
+                'node-tasks': {
+                    title: '✅ Tasks',
+                    description: 'These are the concrete, actionable steps that move your projects forward. Each task should be a single, clear action that can be completed in one session.',
+                    properties: [
+                        { name: 'Name', type: 'Title', purpose: 'The task description.' },
+                        { name: 'Status', type: 'Select/Status', purpose: 'To Do, In Progress, Done.' },
+                        { name: 'Project', type: 'Relation', purpose: 'Links to the Projects database.' },
+                        { name: 'Due Date', type: 'Date', purpose: 'Task deadline.' },
+                        { name: 'Priority', type: 'Select', purpose: 'High, Medium, Low.' },
+                    ]
+                },
+                'node-knowledge': {
+                    title: '🧠 Knowledge Vault',
+                    description: 'Your personal second brain. This database captures ideas, notes from articles and books, and any information that fuels your projects and interests.',
+                    properties: [
+                        { name: 'Title', type: 'Title', purpose: 'Name of the note or input.' },
+                        { name: 'Type', type: 'Select', purpose: 'Literature Note, Concept Note, Idea.' },
+                        { name: 'Source URL', type: 'URL', purpose: 'Link to the original source.' },
+                        { name: 'Related Project', type: 'Relation', purpose: 'Links to Projects.' },
+                        { name: 'Tags', type: 'Multi-select', purpose: 'Keywords for discoverability.' },
+                    ]
+                },
+                'node-journal': {
+                    title: '✍️ Journal',
+                    description: 'The feedback loop for your system. Use it for daily reflection, weekly reviews, and capturing insights to foster self-awareness and continuous improvement.',
+                    properties: [
+                        { name: 'Date', type: 'Date', purpose: 'The day of the entry.' },
+                        { name: 'Mood', type: 'Select/Number', purpose: 'Track your well-being.' },
+                        { name: 'Daily Highlight', type: 'Text', purpose: 'The most important task of the day.' },
+                        { name: 'Wins & Learnings', type: 'Text/Page', purpose: 'Achievements and insights.' },
+                    ]
+                },
+                'node-habits': {
+                    title: '🔁 Habits',
+                    description: 'This database tracks your daily, weekly, and monthly routines. Visual progress indicators and automations help build consistency and reinforce positive behaviors.',
+                    properties: [
+                        { name: 'Habit Name', type: 'Title', purpose: 'e.g., Meditate 10 mins.' },
+                        { name: 'Type', type: 'Select', purpose: 'Daily, Weekly, Monthly.' },
+                        { name: 'Goal', type: 'Relation', purpose: 'Links to a higher-level Goal.' },
+                        { name: 'Streak', type: 'Formula', purpose: 'Calculates consecutive completions.' },
+                    ]
+                },
+                'node-people': {
+                    title: '👥 People',
+                    description: 'A personal CRM to nurture your network. Track interactions, remember important details, and manage relationships with friends, family, and colleagues.',
+                    properties: [
+                        { name: 'Name', type: 'Title', purpose: 'Contact\'s full name.' },
+                        { name: 'Relationship Type', type: 'Multi-select', purpose: 'Friend, Colleague, etc.' },
+                        { name: 'Last Interaction', type: 'Date', purpose: 'Date of last contact.' },
+                        { name: 'Linked Projects', type: 'Relation', purpose: 'For collaborators.' },
+                    ]
+                }
+            };
+
+            // --- RENDER FUNCTIONS ---
+            function renderDbDetails(nodeId) {
+                const data = dbData[nodeId];
+                const container = document.getElementById('db-details-container');
+                if (!data) {
+                    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center">
+                        <span class="text-5xl mb-4">👆</span>
+                        <h4 class="text-2xl font-bold">Explore the Architecture</h4>
+                        <p class="text-gray-500 mt-2">Click on any database node on the left to see its purpose, key properties, and role within the Vita system.</p>
+                    </div>`;
+                    return;
+                }
+
+                let propertiesHtml = data.properties.map(prop => `
+                    <tr class="border-b border-stone-200 hover:bg-stone-50">
+                        <td class="py-3 px-4 font-medium text-stone-700">${prop.name}</td>
+                        <td class="py-3 px-4 text-stone-600">${prop.type}</td>
+                        <td class="py-3 px-4 text-stone-500 hidden sm:table-cell">${prop.purpose}</td>
+                    </tr>
+                `).join('');
+
+                let geminiFeatureHtml = '';
+                if (nodeId === 'node-knowledge' || nodeId === 'node-journal') {
+                    const featureTitle = nodeId === 'node-knowledge' ? 'Generate Knowledge Ideas' : 'Generate Journal Prompts';
+                    const placeholderText = nodeId === 'node-knowledge' ? 'e.g., productivity hacks, future of AI' : 'e.g., overcoming a challenge, daily gratitude';
+                    geminiFeatureHtml = `
+                        <div class="mt-8 pt-6 border-t border-stone-200">
+                            <h5 class="text-xl font-bold mb-3 flex items-center">
+                                ${featureTitle} ✨
+                            </h5>
+                            <textarea id="gemini-prompt" class="w-full p-3 border border-stone-300 rounded-md focus:ring-purple-500 focus:border-purple-500 text-stone-800" rows="3" placeholder="Enter a topic or theme, ${placeholderText}"></textarea>
+                            <button id="generate-ideas-btn" class="mt-3 w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300 ease-in-out font-semibold">
+                                Generate Ideas ✨
+                            </button>
+                            <div id="gemini-output" class="mt-4 p-4 bg-purple-50 text-purple-800 rounded-md border border-purple-200 min-h-[50px] flex items-center justify-center text-center">
+                                Your generated ideas will appear here.
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    <h4 class="text-2xl font-bold mb-2">${data.title}</h4>
+                    <p class="text-gray-600 mb-6">${data.description}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-stone-100 text-stone-800">
+                                <tr>
+                                    <th class="py-2 px-4 font-semibold">Property</th>
+                                    <th class="py-2 px-4 font-semibold">Type</th>
+                                    <th class="py-2 px-4 font-semibold hidden sm:table-cell">Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${propertiesHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${geminiFeatureHtml}
+                `;
+
+                if (nodeId === 'node-knowledge' || nodeId === 'node-journal') {
+                    document.getElementById('generate-ideas-btn').addEventListener('click', generateIdeas);
+                }
+            }
+
+            // --- GEMINI API INTEGRATION ---
+            async function generateIdeas() {
+                const promptInput = document.getElementById('gemini-prompt');
+                const outputDiv = document.getElementById('gemini-output');
+                const generateBtn = document.getElementById('generate-ideas-btn');
+
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    outputDiv.innerHTML = '<span class="text-red-600">Please enter a prompt!</span>';
+                    return;
+                }
+
+                outputDiv.innerHTML = '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div><span class="ml-3 text-purple-600">Generating ideas...</span></div>';
+                generateBtn.disabled = true;
+
+                let chatHistory = [];
+                const currentDb = document.querySelector('.db-node.active')?.id;
+                let contextPrompt = '';
+                if (currentDb === 'node-knowledge') {
+                    contextPrompt = `Generate 3-5 concise, distinct ideas for a knowledge note based on the following theme: "${userPrompt}". Focus on actionable insights or key concepts.`;
+                } else if (currentDb === 'node-journal') {
+                    contextPrompt = `Suggest 3-5 distinct journal prompts or themes based on the following idea: "${userPrompt}". Encourage self-reflection and personal growth.`;
+                } else {
+                    contextPrompt = `Generate 3-5 ideas based on the following: "${userPrompt}"`;
+                }
+                
+                chatHistory.push({ role: "user", parts: [{ text: contextPrompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retryCount = 0;
+                const maxRetries = 5;
+                const baseDelay = 1000; // 1 second
+
+                async function callApiWithBackoff() {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            if (response.status === 429 && retryCount < maxRetries) {
+                                const delay = baseDelay * Math.pow(2, retryCount);
+                                retryCount++;
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                return callApiWithBackoff(); // Retry
+                            }
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            outputDiv.innerHTML = `<pre class="whitespace-pre-wrap font-sans text-sm">${text}</pre>`;
+                        } else {
+                            outputDiv.innerHTML = '<span class="text-red-600">Could not generate ideas. Please try again.</span>';
+                        }
+                    } catch (error) {
+                        outputDiv.innerHTML = `<span class="text-red-600">Error: ${error.message}. Please try again later.</span>`;
+                    } finally {
+                        generateBtn.disabled = false;
+                    }
+                }
+
+                callApiWithBackoff();
+            }
+
+
+            // --- CHART.JS ---
+            const ctx = document.getElementById('methodologiesChart').getContext('2d');
+            const methodologiesChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Capture (GTD)', 'Structure (PARA)', 'Alignment (OKRs)', 'Focus (Deep Work)', 'Consistency (Habits)', 'Reflection (Review)'],
+                    datasets: [{
+                        label: 'Vita System Focus',
+                        data: [9, 8, 9, 7, 8, 9],
+                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(168, 85, 247, 1)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14 } },
+                            ticks: {
+                                backdropColor: 'rgba(245, 245, 244, 1)',
+                                color: '#57534e',
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        label += context.parsed.r;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- EVENT LISTENERS ---
+            const dbNodes = document.querySelectorAll('.db-node');
+            dbNodes.forEach(node => {
+                node.addEventListener('click', function() {
+                    dbNodes.forEach(n => n.classList.remove('active'));
+                    this.classList.add('active');
+                    renderDbDetails(this.id);
+                });
+            });
+            
+            // Mobile navigation
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+
+            // Active nav link highlighting on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                        // Update mobile nav selector
+                        mobileNav.value = `#${entry.target.id}`;
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+
+            // --- INITIALIZATION ---
+            renderDbDetails(null); // Render initial placeholder
+        });
+    </script>
+</body>
+</html>
